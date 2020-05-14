@@ -114,11 +114,11 @@ class SnakeChain {
 }
 
 class SnakeTime {
-  interval: NodeJS.Timeout;
+  interval: number;
   subscriber: (() => void) | undefined;
 
   constructor() {
-    this.interval = setInterval(this.tick, 500);
+    this.interval = window.setInterval(this.tick, 500);
   };
 
   tick = () => {
@@ -134,7 +134,16 @@ class SnakeTime {
   }
 }
 
-export function useSnakeModel(width: number, height: number) {
+class SnakeCollisionDetector {
+  detect(chain: Point[], width: number, height: number, onCollision: () => void) {
+    const last = chain[chain.length - 1];
+    if (last.x === 0 || last.y === 0 || last.x === width - 1 || last.y === height - 1) {
+      onCollision();
+    }
+  }
+}
+
+export function useSnakeModel(width: number, height: number, onCollision: () => void) {
   const [direction, setDirection] = useState(Direction.Right);
   const [snake, setSnake] = useState({
     chain: [
@@ -163,15 +172,17 @@ export function useSnakeModel(width: number, height: number) {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setSnake({
+      const newSnake = {
         chain: new SnakeChain(snake.chain)
           .moveOneFromBegin()
           .addPointToEnd(direction)
           .get()
-      })
+      };
+      new SnakeCollisionDetector().detect(snake.chain, width, height, onCollision);
+      setSnake(newSnake);
     }, 500);
     return () => clearInterval(interval)
-  }, [snake, direction]);
+  }, [snake, direction, width, height, onCollision]);
 
   return { snake, engine };
 }

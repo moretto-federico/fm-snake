@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from "react"
+import React, { useCallback, useEffect, useState } from "react"
 import Snake from "./Snake";
 import { useSnakeModel } from "./hooks/useSnakeModel";
 
@@ -14,7 +14,11 @@ export type BoardProps = {
  */
 export default function Board(props: BoardProps) {
   const { width, height, size } = props;
-  const { snake, engine } = useSnakeModel(width, height);
+
+  const [collisionDetected, setCollisionDetected] = useState(false);
+  const onCollision = useCallback(() => setCollisionDetected(true), []);
+
+  const { snake, engine } = useSnakeModel(width, height, onCollision);
 
   const keyPressed = useCallback((evt: KeyboardEvent) => {
     if (evt.key.startsWith('Arrow')) {
@@ -34,7 +38,8 @@ export default function Board(props: BoardProps) {
 
   return (
     <div className="fm-snake-board">
-      <Snake chain={snake.chain} size={size} />
+      {collisionDetected && <div>The End!</div>}
+      {!collisionDetected && <Snake chain={snake.chain} size={size} />}
     </div>
   )
 
