@@ -28,7 +28,7 @@ module.exports = {
     colors: true
   },
   devtool: 'eval-source-map', // no in production
-  target: 'browser',
+  target: 'web',
   devServer: {
     port: 3000,
     contentBase: path.join(__dirname, 'build')
